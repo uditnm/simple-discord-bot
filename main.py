@@ -1,14 +1,16 @@
 import discord
+from discord.ext import commands
 import requests
 import json
 
-client = discord.Client()
+client = commands.Bot(command_prefix='.')
+
 
 def get_pic():
     response = requests.get("https://dog.ceo/api/breeds/image/random")
     json_data = json.loads(response.text)
     dog = json_data["message"]
-    return(dog)
+    return dog
 
 def get_breed(breed):
     response = requests.get("https://dog.ceo/api/breed/{0}".format(breed)+"/images/random")
@@ -19,10 +21,15 @@ def get_breed(breed):
 def get_list():
     response = requests.get("https://dog.ceo/api/breeds/list/all")
     json_data = json.loads(response.text)
-    dog_list=[]
+    dog_list = []
     for key in json_data["message"]:
         dog_list.append(key)
     return(dog_list)
+
+dog_list = get_list()
+dogs = ""
+for x in dog_list:
+    dogs = dogs + x + "\n"
 
 @client.event
 async def on_ready():
@@ -34,7 +41,7 @@ async def on_message(message):
         return
 
     dog = get_pic()
-    dog_list = get_list()
+
     if message.content.startswith("pls dog"):
         await message.add_reaction("🐕")
         await message.channel.send(dog)
@@ -47,5 +54,16 @@ async def on_message(message):
         breed_pic = get_breed(breed)
         await message.channel.send(breed_pic)
 
-client.run("token")
+    await client.process_commands(message)
 
+@client.command()
+async def doglist(ctx):
+    embed = discord.Embed(
+        title="DOG LIST",
+        description=dogs,
+        colour=discord.Colour.blue()
+    )
+
+    await ctx.send(embed=embed)
+
+client.run(TOKEN)
