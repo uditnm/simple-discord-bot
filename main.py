@@ -46,9 +46,6 @@ async def on_message(message):
         await message.add_reaction("🐕")
         await message.channel.send(dog)
 
-    if message.content.startswith("pls list"):
-        await message.channel.send(dog_list)
-
     if any( breed in message.content for breed in dog_list):
         breed = message.content
         breed_pic = get_breed(breed)
